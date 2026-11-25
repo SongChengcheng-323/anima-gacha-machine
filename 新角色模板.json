@@ -1,0 +1,18 @@
+{
+ "_说明": "把这份复制成 _新角色_你的角色.json 再改；tag 全库唯一，缺的项可以删掉整行",
+ "tag": "your_character",
+ "cn": "你的角色",
+ "work": "作品名（决定相册分类，works.py 里要有对应项）",
+ "hair": "aqua hair, very long twintails",
+ "eyes": "aqua eyes",
+ "body": "",
+ "face": "",
+ "extra": "身份特征（只写长相/体质，服装写在 default_outfit）",
+ "default_outfit": "detached sleeves",
+ "props": "",
+ "short": "短名（可选，相册里显示用）",
+ "moods": [
+  "cheerful smile, blushing",
+  "shy smile, looking away"
+ ]
+}

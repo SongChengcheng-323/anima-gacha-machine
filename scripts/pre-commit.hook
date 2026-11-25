@@ -1,0 +1,29 @@
+#!/bin/bash
+fail=0
+while IFS= read -r -d '' f; do
+  case "$f" in
+    *.py)
+      if ! python3 -m py_compile "$f" >/dev/null 2>&1; then
+        echo "  ✗ 语法不过（Python）：$f"
+        python3 -m py_compile "$f" 2>&1 | tail -3 | sed 's/^/      /'
+        fail=1
+      fi ;;
+    *.js)
+      if command -v node >/dev/null 2>&1; then
+        node --check "$f" >/dev/null 2>&1 || { echo "  ✗ 语法不过（JS）：$f"; fail=1; }
+      fi ;;
+  esac
+  if [ -f "$f" ]; then
+    sz=$(wc -c < "$f" 2>/dev/null || echo 0)
+    if [ "$sz" -gt 5242880 ]; then
+      echo "  ✗ 文件超过 5MB（不适合进 git）：$f（$((sz/1048576))MB）"
+      fail=1
+    fi
+  fi
+done < <(git -c core.quotepath=false diff --cached --name-only --diff-filter=ACM -z)
+if [ "$fail" != "0" ]; then
+  echo ""
+  echo "  ⇒ 提交被拦下（自检没通过）✓ 修好再来；确实要跳过：git commit --no-verify"
+  echo ""
+fi
+exit $fail

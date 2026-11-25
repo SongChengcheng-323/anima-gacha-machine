@@ -1,0 +1,36 @@
+ACTIONS = {
+    "normal": {"desc": "", "bodies": None, "pref_outfit": [], "req": "", "weight": 7, "hands": 0},
+    "photo_pose": {
+        "desc": "natural pose",
+        "bodies": ["standing", "sitting", "leaning back",
+                   "sitting", "lying on her back", "kneeling"],
+        "pref_outfit": ["wearing", "casual", "chic", "uniform", "swim"],
+        "req": "",
+        "weight": 8,
+        "hands": 0,
+    },
+    "photo_stretch": {
+        "desc": "",
+        "bodies": None,
+        "pref_outfit": ["wearing", "casual", "home", "lingerie"],
+        "req": "",
+        "weight": 1,
+        "hands": 1,
+    },
+    "photo_phone": {
+        "desc": "",
+        "bodies": ["standing", "sitting", "sitting", "reclining"],
+        "pref_outfit": ["wearing", "casual", "home"],
+        "req": "",
+        "weight": 1,
+        "hands": 1,
+    },
+    "photo_peek": {
+        "desc": "",
+        "bodies": ["standing", "kneeling", "sitting"],
+        "pref_outfit": ["wearing", "casual", "chic", "swim", "lingerie"],
+        "req": "",
+        "weight": 2,
+        "hands": 0,
+    },
+}

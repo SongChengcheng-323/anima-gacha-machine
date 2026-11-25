@@ -1,0 +1,81 @@
+# ═══ 图库内容（绝不进仓库）═══
+# 仓库只放代码，图片全在本机。2.4G 的图推进 git 会把仓库撑爆，而且也没必要 ——
+# 代码是资产，图是产物。
+/2026*/
+/重抽_*/
+/社媒/
+/自动抽卡/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+# 但网页图标要留着（它们是代码的一部分，不是产物）
+!/web_icons/
+!/web_icons/*.png
+!/web_icons/*.ico
+!web/app.css
+
+# ═══ 运行数据（含隐私，绝不进仓库）═══
+_日志.jsonl
+*.log
+.photo_favs.json*
+.photo_tags.json*
+.photo_char.json
+.photo_tier.json
+.photo_thumbs/
+redraw_jobs.jsonl
+
+# ═══ 生成物 / 缓存 ═══
+__pycache__/
+*.pyc
+*.bak
+*.safety
+.DS_Store
+._*
+__MACOSX/
+
+# ═══ 备份 ═══
+_备份_*/
+_*.json
+_识别测试/
+_候选图*/
+# ── 2026-10-09 版本管理整理 ──
+_归档/_models_dl/
+*.jsonl.bak-*
+_归档/备份/*.bak-*
+封包_*.tar.gz
+封包_*.zip
+分享包_*.tar.gz
+分享包_*.zip
+封包_*/
+分享包_*/
+旧包_*/
+_备份/
+
+# 参考仓库（外部 clone，不入本库）
+_归档/_参考_AnimaTools_20261013/
+
+# 运行状态（抽卡机启动/停止留痕，每次跑都变 —— 不入库 ✓ 2026-10-14）
+_运行状态.json
+_运行状态.json.tmp
+
+
+# ═══ 运行数据（开源版不给默认值，让用户自己生成）═══
+roll_config.json
+_每日上限.json
+_重抽队列.json
+_开源整理_移除/
+_预览_README*.html
+_预览截图/
+
+# 例图（README 要用，属代码资产，不是产物）
+!docs/images/
+!docs/images/*.jpg
+
+# 出图目录（= 相册根）
+/output/
+_抽卡机.pid
+_停止标记
+_暂停标记
+_产线.out.log

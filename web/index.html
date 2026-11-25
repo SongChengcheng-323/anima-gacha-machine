@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>壁纸相册</title>
+
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="壁纸相册">
+
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0f0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="/app.css?v=10052258">
+</head>
+<body>
+
+<div id="page-photos">
+  <header>
+    <h1><span style="cursor:pointer" onclick="goHome()" title="点击回到主页（清除筛选）">壁纸相册</span> <span id="cnt"></span>
+      <span id="ver-badge" style="font-size:10px;color:#5a5464;font-weight:400;margin-right:6px" title="版本（自动读 CHANGELOG）">v…</span>
+      <button id="btn-sel" style="float:right;background:var(--bg2);border:1px solid var(--line);
+        color:var(--fg);border-radius:9px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer">选择</button>
+    </h1>
+    <div class="filters" id="f-char" style="margin-top:6px"></div>
+    <div class="more-toggle" id="char-toggle" style="display:none"></div>
+
+    <div id="tag-wrap" style="display:none">
+      <div class="filters" id="f-tag" style="margin-top:6px"></div>
+      <div class="more-toggle" id="tag-toggle" style="display:none"></div>
+    </div>
+    <div class="row">
+      
+      
+      <select id="f-tier">
+        <option value="">全部尺度</option></select>
+      
+      
+      <select id="f-ratio">
+        <option value="">全部比例</option>
+        <option value="portrait">📱 竖屏</option>
+        <option value="landscape">🖥 横屏</option>
+        <option value="square">⬛ 方图</option>
+        <option value="narrow">📲 窄屏 (9:19.5)</option>
+      </select>
+      <select id="f-work"><option value="">全部作品</option></select>
+      <select id="f-style"><option value="">全部画风</option></select>
+      <select id="f-album"><option value="">全部相册</option></select>
+      <select id="f-sort">
+        <option value="new">最新优先</option>
+        <option value="old">最早优先</option>
+        <option value="name">按文件名</option>
+        <option value="size">按文件大小</option>
+      </select>
+      <button class="chip" id="btn-fav" style="border-radius:9px">⭐ 收藏</button>
+      <button class="chip" id="btn-merge" style="border-radius:9px;display:none"
+        onclick="mergeRedrawFolder()"
+        title="把这个重抽文件夹里的图搬进同一天的正式文件夹，然后删掉它">📥 一键合并入当天</button>
+    </div>
+  </header>
+  <div id="grid"></div>
+  <div id="loading" style="display:none">加载中…</div>
+</div>
+
+<div id="page-albums" style="display:none">
+  <header><h1>相册 <span id="album-cnt"></span></h1></header>
+  <div id="album-list"></div>
+</div>
+
+<div id="viewer">
+  <div class="top">
+    <button onclick="closeViewer()">✕</button>
+    <span id="v-vcount" style="font-size:11px;color:#ff8ec4;flex:none;margin-right:6px"></span>
+    <span id="v-title" style="flex:1;font-size:13px;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    <button id="btn-info" onclick="toggleInfo()">📝 提示词</button>
+    <button id="btn-raw" onclick="openRaw()">原图</button>
+    
+    <button id="btn-clean" onclick="toggleClean()" title="快捷键 C　隐藏所有悬浮按钮（画面干净 · 快捷键照旧能用）">🧹 清屏</button>
+  </div>
+  
+  <span id="v-favmark" title="收藏状态">⭐</span>
+  <div class="body" id="v-body">
+    <div id="v-versions" title="↑ ↓ 切换版本（V 也能循环）"></div>
+    <button class="nav prev" onclick="navPhoto(-1)" title="快捷键 ←">‹</button>
+    <img id="v-img" src="">
+    <button class="nav next" onclick="navPhoto(1)" title="快捷键 →">›</button>
+    <div class="floatbar">
+      <button class="primary" onclick="actRedraw()" title="快捷键 R">🔁 重抽<span class="kbd">R</span></button>
+      <button onclick="actQuickRedraw()" title="快捷键 Q">🎲 快抽<span class="kbd">Q</span></button>
+      
+      <button onclick="actTag()" title="快捷键 T">🏷 标签<span class="kbd">T</span></button>
+      <button id="btn-vfav" onclick="actFav()" title="快捷键 F（再按一次取消收藏）"><span id="btn-vfav-txt">☆ 收藏</span><span class="kbd">F</span></button>
+    </div>
+    <div class="floatdel">
+      <button onclick="actDelete()" title="快捷键 D">🗑 删除<span class="kbd">D</span></button>
+    </div>
+  </div>
+  <div class="info" id="v-info"></div>
+  
+  <button id="btn-exitfs" onclick="toggleClean()" title="退出全屏（Esc / C 也行）">
+    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+      <path d="M9 4.5H4.5V9M15 4.5h4.5V9M9 19.5H4.5V15M15 19.5h4.5V15"
+            fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+
+
+<div id="repaint">
+  <div class="rp-top">
+    <button onclick="closeRepaint()">✕</button>
+    <b>重抽 <span id="rp-src" style="font-size:11px;color:#888;font-weight:400"></span></b>
+    <button class="primary" onclick="submitRepaint()">开始重抽</button>
+  </div>
+  <div class="rp-body">
+    <div class="rp-grp"><h4>提示词（双击标签删除 · 显示中文，执行英文）</h4>
+      <div id="rp-tags"></div>
+      <button class="rp-add" onclick="openPicker()">＋ 从标签库添加</button>
+    </div>
+    <div class="rp-grp">
+      <h4>参数</h4>
+      <div class="rp-row"><label>尺寸</label><select id="rp-size"></select></div>
+      <div class="rp-row"><label>步数</label><select id="rp-steps"></select></div>
+      <div class="rp-row"><label>张数</label><select id="rp-count"></select></div>
+      <div class="rp-row"><label>种子</label><select id="rp-seed">
+        <option value="inherit">继承原图（同种子）</option>
+        <option value="random">随机（换一张）</option>
+      </select></div>
+      <p class="rp-hint" id="rp-hint"></p>
+    </div>
+
+    <div class="rp-grp"><h4>一键指令（保留原图设定）</h4>
+      <div style="display:flex;gap:8px">
+        <button class="rp-btn" onclick="quickAction('style')">🎨 换个画风</button>
+        <button class="rp-btn" onclick="quickAction('advance')">⏩ 更进一步</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="rp-btn" onclick="quickAction('split')">🔧 拆分·设定图</button>
+        <button class="rp-btn" onclick="openOutfitPanel()">👗 换装</button>
+      </div>
+      <p class="rp-hint">
+        「拆分·设定图」= 给提示词<b>加上部位标签</b>（head: / eyes: / top: / hips: …）
+        + <b>去掉环境描述</b>省预算 + <b>强制横屏</b> → 出多视角设定图。
+      </p>
+      <p class="rp-hint">
+        都按<b>原种子</b>重画（服装、构图基本不变）。<br>
+        「更进一步」按亲密度推进一级：<br>
+        无漏 → 脱衣 → 露点 → 勾引 → 自慰 → 做爱 → 高潮 → 射精 → 事后
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<div id="outfitpanel">
+  <div class="rp-top">
+    <h3>👗 换装 <span style="font-size:12px;color:var(--fg2)">（只在时尚档生效）</span></h3>
+    <button class="ghost" onclick="closeOutfitPanel()">✕</button>
+  </div>
+  <p class="rp-hint">点上面的<b>套装</b>＝套内随机组合一套；点下面的<b>缩略图</b>＝照搬那套搭配。
+    两者都会保留原图的<b>角色 / 场景 / 画风 / 机位</b>，只换衣服。</p>
+  <div class="rp-grp"><h4>套装（套内随机组合）</h4><div id="op-sets" class="op-sets"></div></div>
+  <div class="rp-grp"><h4>我保存的搭配</h4><div id="op-thumbs" class="op-grid"></div></div>
+</div>
+
+
+<div id="stylepanel">
+  <div class="rp-top">
+    <button onclick="closeStylePanel()">✕</button>
+    <b>🎨 换个画风 <span style="font-size:11px;color:var(--fg2);font-weight:400">（扫描画风描述段 → 整段替换）</span></b>
+  </div>
+  <p class="rp-hint">点哪一位 = 换成哪一位的<b>画风</b>（写法 `@画师`）。其余设定（角色/服装/场景/机位/状态）<b>全部保留</b>，
+    种子沿用原图 ⇒ 构图和服装基本不变，只有画风变。</p>
+  <div class="rp-grp"><h4>可选画风（在用）</h4><div id="sp-list" class="op-sets"></div></div>
+</div>
+
+
+<div id="tagpicker">
+  <div class="rp-top">
+    <button onclick="closePicker()">✕</button>
+    <b>标签库 <span id="tp-sel" style="font-size:11px;color:#888;font-weight:400"></span></b>
+    <button class="primary" onclick="closePicker()">完成</button>
+  </div>
+  <div class="tp-search"><input id="tp-q" placeholder="搜索标签（中文/英文）" oninput="renderPicker()"></div>
+  <div class="tp-tabs" id="tp-tabs"></div>
+  <div id="tp-list"></div>
+</div>
+
+
+<div id="gachapanel">
+  <div class="rp-top">
+    <button class="ghost" onclick="closeGacha()">← 返回</button>
+    <b>ガチャ · 自定义抽卡</b>
+    <button class="primary" onclick="gachaSubmit()">ガチャ</button>
+  </div>
+  <div class="rp-body">
+    <div class="rp-grp"><h4>提示词</h4>
+      <textarea id="gc-prompt" rows="4" style="width:100%;box-sizing:border-box"
+        placeholder="从下面词库点选，或自己打字"></textarea>
+      <div class="rp-row"><button class="rp-btn" onclick="gcResetFix()">恢复固定前缀尾缀</button></div>
+      <p class="rp-hint" id="gc-hint"></p>
+      <p class="rp-hint" id="gc-tier"></p>
+    </div>
+
+    <div class="rp-grp"><h4>快速选择 <span style="font-size:11px;color:var(--fg2);font-weight:400">（下拉互斥：作品 → 角色 → 尺度 → …，选完自动进上面的提示词）</span></h4>
+      <div id="gc-sel" class="gcs-wrap"></div>
+      <div class="rp-row" style="margin-top:6px">
+        <button class="rp-btn" onclick="gcSelReroll()">🎲 重掷随机项</button>
+        <button class="rp-btn" id="gc-auto" onclick="gcToggleAuto()">🪄 自动补满：开</button>
+        <button class="rp-btn" onclick="gcSelClear()">清空所有下拉</button>
+      </div>
+      <p class="rp-hint" id="gc-sel-hint"></p>
+    </div>
+
+    <div class="rp-grp"><h4>我的标签 <span style="font-size:11px;color:var(--fg2);font-weight:400">（自己加的，点一下插进提示词）</span></h4>
+      <div class="rp-tags" id="mt-list"></div>
+      <div class="mtform">
+        <input id="mt-en" placeholder="英文标签（必填，如 silver earrings）">
+        <input id="mt-cn" placeholder="中文（可留空）">
+        <select id="mt-cat"></select>
+        <select id="mt-tier">
+          <option value="">分类（自动）</option>
+          <option value="general">通用</option>
+          <option value="fashion">时尚</option>
+          <option value="tease">擦边</option>
+          <option value="exposed">暴露</option>
+          <option value="sex">性爱</option>
+        </select>
+        <button class="rp-btn" onclick="myTagSave()">＋ 保存</button>
+      </div>
+      <p class="rp-hint" id="mt-hint"></p>
+    </div>
+
+    <div class="rp-grp"><h4>参数</h4>
+      <div class="rp-row"><label>尺寸</label><select id="gc-size"></select></div>
+      <div class="rp-row"><label>步数</label><select id="gc-steps"></select></div>
+      <div class="rp-row"><label>抽几张</label><select id="gc-count"></select></div>
+    </div>
+
+    <div id="gc-tags"></div>
+  </div>
+</div>
+
+
+
+<div id="queuepanel">
+  <div class="qp-top"><b>🔁 重抽队列 <span id="qp-n" style="color:var(--fg2);font-weight:400;font-size:13px"></span></b>
+    <button onclick="closeQueuePanel()">✕</button></div>
+  <div class="qp-hint">拖左边的 <b>≡</b> 手柄调整顺序（行上其他地方随便滑，正常滚动），调整完点下面的确认才生效</div>
+  <div class="qp-list" id="qp-list"></div>
+  <div class="qp-bar" id="qp-bar">
+    <button class="primary" id="qp-save" onclick="saveQueueOrder()">确认排序</button>
+    <button class="ghost" onclick="resetQueueOrder()">还原</button>
+  </div>
+  <div class="qp-actions">
+    <button class="ghost" onclick="clearDone()">🧹 清除已完成</button>
+    <button class="ghost" onclick="retryFailed()">🔄 重跑失败</button>
+  </div>
+</div>
+
+
+<div id="rollpanel">
+  <div class="rp-top">
+    <button onclick="closeRollPanel()">✕</button>
+    <b>抽卡机 <span style="color:#c98a3a;font-weight:700">v3</span> <span id="roll-state" style="font-size:11px;color:#888;font-weight:400"></span></b>
+    <button class="primary" onclick="refreshRoll()">刷新</button>
+  </div>
+  <div class="rp-body">
+    <div class="rp-grp"><h4>运行状态</h4>
+      <div class="rp-row"><label>状态</label><span class="val" id="roll-run">…</span></div>
+      <div class="rp-row"><label>今日产出</label><span class="val" id="roll-today">…</span></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="rp-btn" onclick="rollCtl('start')">▶️ 启动</button>
+        <button class="rp-btn" onclick="rollCtl('restart')">🔄 重启</button>
+        <button class="rp-btn warn" onclick="rollCtl('stop')">⏹ 停止</button>
+      </div>
+    </div>
+
+    <div class="rp-grp"><h4>优先级 <span id="prio-now" style="font-size:11px;color:var(--fg2);font-weight:400"></span></h4>
+      <div style="display:flex;gap:8px">
+        <button class="rp-btn" id="prio-high" onclick="rollPrio('high')">⚡ 高性能（晚上）</button>
+        <button class="rp-btn" id="prio-low" onclick="rollPrio('low')">🌙 让路（白天）</button>
+      </div>
+      <p class="rp-hint" id="prio-hint">…</p>
+    </div>
+
+    <div class="rp-grp"><h4>自定义抽卡</h4>
+      <button class="rp-btn" style="width:100%" onclick="openGacha()">🎲 ガチャ · 自定义抽卡</button>
+      <p class="rp-hint">从词库自己拼提示词 · 和重抽同一条管线 · 固定前缀尾缀已挂好（可点掉）</p>
+    </div>
+
+    <div class="rp-grp"><h4>尺度权重（相对值，可以拉满也可以归零）</h4>
+      <div class="rp-row"><label>✨ 时尚</label><input type="number" id="tw-fashion" min="0" step="1"></div>
+      <div class="rp-row"><label>擦边</label><input type="number" id="tw-tease" min="0" step="1"></div>
+      <div class="rp-row"><label>暴露</label><input type="number" id="tw-exposed" min="0" step="1"></div>
+      <div class="rp-row"><label>🔥 性爱</label><input type="number" id="tw-sex" min="0" step="1"></div>
+      <p class="rp-hint">当前值越高占比越大。例：时尚 100 / 其余 0 = 只出不含暴露提示词的图。</p>
+      <p class="rp-hint" id="equip-params-hint"></p>
+      <button class="rp-add" onclick="saveEquipConfig()">💾 保存权重</button>
+      <p class="rp-hint">保存后点抽卡机浮窗里的「🔄 重启」生效。</p>
+    </div>
+
+    
+    <div class="rp-grp"><h4>人物筛选 <span id="cf-n" style="font-weight:400;font-size:11px;color:#888"></span>
+        <button class="rp-mini" onclick="cfLoad(true)" title="重新读取">↻</button></h4>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <button class="rp-btn" onclick="cfAll(true)">☑ 全选</button>
+        <button class="rp-btn" onclick="cfAll(false)">☐ 全不选</button>
+      </div>
+      <input id="cf-q" placeholder="搜角色名…" oninput="cfFilter()"
+             style="width:100%;margin-bottom:6px;padding:6px 8px;border-radius:8px;border:1px solid #3a3344;background:#1c1724;color:#eee">
+      <div id="cf-box" style="max-height:340px;overflow:auto"></div>
+      <p class="rp-hint">点一下 = 切换「出 / 不出」（灰掉 = 不出）。按作品分组，同作品按拼音排。
+        保存即时生效于<b>下次出图</b>（抽卡机重启用新名单）。
+        <b>全部禁用时抽卡机会安全兜底退回全部</b> —— 先「全不选」再点亮想要的那几个即可。</p>
+    </div>
+
+    <div class="rp-grp"><h4>客观参数</h4>
+      
+      <div class="rp-row"><label>竖 1024×1536</label><input type="number" id="rc-sw-1024x1536" min="0" step="1"></div>
+      <div class="rp-row"><label>窄屏 896×1984</label><input type="number" id="rc-sw-896x1984" min="0" step="1"></div>
+      <div class="rp-row"><label>横 1536×1024</label><input type="number" id="rc-sw-1536x1024" min="0" step="1"></div>
+      <div class="rp-row"><label>方 1536×1536</label><input type="number" id="rc-sw-1536x1536" min="0" step="1"></div>
+      <p class="rp-hint">相对值：数字越大占比越高，按实际数值归一化。例：竖 100 / 其余 0 = 只出竖图。
+        <b>步数固定 12、种子固定随机</b>，不再单独调。</p>
+      
+      <div class="rp-row"><label>软上限</label>
+        <input id="rc-cap" type="number" min="0" step="10" inputmode="numeric"
+               style="width:7em" placeholder="100">
+        <span class="rp-hint" style="margin:0 0 0 8px;padding:0">张／天 · 填 0 = 不限</span></div>
+      <div class="rp-row"><label>硬上限</label>
+        <input id="rc-caphard" type="number" min="0" step="10" inputmode="numeric"
+               style="width:7em" placeholder="200">
+        <span class="rp-hint" style="margin:0 0 0 8px;padding:0">张／天 · 碰到就彻底停工</span></div>
+      <p class="rp-hint">
+        <b>软上限</b>：到点自动停；<b>已经停在那条线上</b>时，点「启动」才允许继续往上出
+        —— 没到线时重启不会涨额度。<br>
+        <b>硬上限</b>：一旦碰到，怎么点启动/重启都不再出卡（产线今天下班），
+        <b>重抽不受影响</b>，照常用。第二天零点自动复位。</p>
+      <p class="rp-hint" id="rc-params-hint">尺寸比例由参数表决定（竖 55% / 窄屏 15% / 横 10% / 方 20%，12 步）；<b>第 4 档 🧪 = 珍藏/放大档：单尺寸 1024×1536</b>；种子可随机或固定（固定=手动填数字）。</p>
+    </div>
+
+    <button class="rp-add" onclick="saveRollConfig()">💾 保存参数</button>
+    <p class="rp-hint">保存后点上面的「🔄 重启」生效（改的是状态，不动版本号）。</p>
+
+    <div class="rp-grp" style="margin-top:12px"><h4>最近日志</h4>
+      <pre id="roll-log">加载中…</pre>
+    </div>
+  </div>
+</div>
+
+
+<div id="equippanel" style="display:none">
+  <div class="rp-top">
+    <button onclick="closeEquipPanel()">✕</button>
+    <b><span class="lamp" id="equip-lamp"></span>装备机 <span id="equip-state" style="font-size:11px;color:#888;font-weight:400"></span></b>
+    <button class="primary" onclick="refreshEquip()">刷新</button>
+  </div>
+  <div class="rp-body">
+    <div class="rp-grp"><h4>运行状态</h4>
+      <div class="rp-row"><label>出卡灯</label><span class="val" id="equip-lamp-txt">…</span></div>
+    </div>
+    <div class="rp-grp"><h4>怎么看 / 怎么改</h4>
+      <p class="rp-hint">
+        <b>双击</b>标签 = 禁用 / 启用（跟重抽页一致）；禁用的词变灰带删除线，装备机不再抽它。<br>
+        颜色 = 尺度：<span class="tchip t-fashion">时尚挂</span>
+        <span class="tchip t-tease">擦边</span><span class="tchip t-exposed">暴露</span>
+        <span class="tchip t-sex">性爱</span><span class="tchip t-normal">通用</span><br>
+        <b>「角色」分类里单击一个角色</b> → 展开它的全部特征 + <b>👗 原皮</b>（默认服装），可逐个双击禁用；
+        🔒 灰色的是<b>本体特征</b>（删了也会出，不可禁）。<br>
+        <b>「其他」</b> = 历史残留的旧标签：已停用 · 默认禁用 · <b>点不开</b>。<br>
+        标签左下角<b>小圆点</b> ● = 这个词<b>缺中文翻译</b>（悬浮看英文原文）。</p>
+    </div>
+
+    
+
+    <div class="rp-grp" style="margin-top:12px">
+      <h4>候选池 <span id="pools-n" style="font-weight:400;font-size:11px;color:#888"></span>
+        <button class="rp-mini" onclick="loadPools(true)" title="重新读取">↻</button></h4>
+      <p class="rp-hint">点开看每个池子里有什么 —— 中文显示，装备机实际在用的就是这些。颜色 = 尺度（见上）。</p>
+      <input id="pools-q" class="rp-search" placeholder="🔍 搜池子里的词…" oninput="filterPools()">
+      <div id="pools-box"><p class="rp-hint">展开加载…</p></div>
+      <div class="pool-foot">
+        <span id="pools-dirty" class="pool-dirty"></span>
+        <button class="rp-add" id="pools-save" onclick="savePoolsOff()" disabled>✓ 确认修改</button>
+      </div>
+      <p class="rp-hint"><b>双击</b>一个词 = 变灰（未激活）→ 装备机不再抽它。改完点「确认修改」，再点抽卡机浮窗里的「🔄 重启」生效。</p>
+    </div>
+  </div>
+</div>
+
+
+<button id="rd-badge" onclick="openToolMenu()" title="抽卡机 / 装备机 / 重抽队列">⚙️</button>
+<div id="tool-menu">
+  
+  <div class="tm-item" id="tm-roll" onclick="menuPick('roll')"><span class="ic">⚙️</span> 抽卡机<span class="lamp" id="tm-lamp-roll"></span></div>
+  <div class="tm-item maintenance" id="tm-equip" onclick="menuPick('equip')" title="装备机维护中：它的设置（尺度权重）已并入抽卡机设置页"><span class="ic">👗</span> 装备机（维护中）<span class="lamp" id="tm-lamp-equip"></span></div>
+  <div class="tm-item" onclick="menuPick('queue')"><span class="ic">🔁</span> 重抽队列 <span id="tm-qn" style="color:var(--fg2);font-size:12px"></span></div>
+  <div class="tm-item" id="tm-install" onclick="pickInstall()" style="display:none">
+    <span class="ic">📲</span> 安装到桌面
+  </div>
+</div>
+
+
+<button id="to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
+
+
+<div id="charmodal">
+  <div class="cm-top"><b>角色 / 尺度</b>
+    <span id="cm-n" style="color:var(--fg2);font-weight:400;font-size:12px"></span>
+    <button onclick="closeCharPicker()">✕</button></div>
+  <input id="cm-search" placeholder="搜索角色，或直接打新名字（回车新建）…" oninput="renderCharList()" onkeydown="if(event.key==='Enter'){event.preventDefault();createCharNew();}">
+  
+  <div class="cm-tiers" id="cm-tiers"></div>
+  <div class="cm-list" id="cm-list"></div>
+  <div class="cm-foot">
+    <button class="ghost" onclick="pickChar('')">清除角色指定（回到自动识别）</button>
+  </div>
+</div>
+
+
+<div id="tiermodal">
+  <div class="cm-top"><b>指定分类</b>
+    <span id="tm2-n" style="color:var(--fg2);font-weight:400;font-size:12px"></span>
+    <button onclick="closeTierPicker()">✕</button></div>
+  <div class="cm-list" id="tm2-list"></div>
+  <div class="cm-foot">
+    <button class="ghost" onclick="pickTier('')">清除指定（回到自动识别）</button>
+  </div>
+</div>
+
+<div class="selbar" id="selbar">
+  <span class="n" id="sel-n">已选 0 张</span>
+  <button onclick="selectAll()" id="btn-allsel">☑ 全选</button>
+  <button class="primary" onclick="openCharPickerForSel()">👤 角色 / 尺度</button>
+  <button onclick="tagSelected()">🏷 打标签</button>
+  <button onclick="quickRedrawSelected()">🎲 快抽</button>
+  <button onclick="favSelected()">⭐ 收藏</button>
+  <button onclick="unfavSelected()">☆ 取消收藏</button>
+  <button onclick="downloadSelected()">⬇ 下载</button>
+  
+  <button class="danger" onclick="deleteSelected()">🗑 删除</button>
+  <button onclick="clearSel()">取消</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="/app.js?v=10052258"></script>
+</body>
+</html>

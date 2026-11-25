@@ -1,0 +1,177 @@
+{
+  "digital": {
+    "cn": "数字厚涂",
+    "py": "S",
+    "cat": "画风类"
+  },
+  "gacha": {
+    "cn": "华丽半厚涂",
+    "py": "H",
+    "cat": "画风类"
+  },
+  "guofeng": {
+    "cn": "国风仙气",
+    "py": "G",
+    "cat": "画风类"
+  },
+  "eye contact": {
+    "cn": "眼神对视",
+    "py": "Y",
+    "cat": "机位景别类"
+  },
+  "extreme close-up": {
+    "cn": "极特写",
+    "py": "J",
+    "cat": "机位景别类"
+  },
+  "eye-level shot": {
+    "cn": "平视角度",
+    "py": "P",
+    "cat": "机位景别类"
+  },
+  "slightly high angle": {
+    "cn": "略高角度",
+    "py": "L",
+    "cat": "机位景别类"
+  },
+  "slightly low angle": {
+    "cn": "略低角度",
+    "py": "L",
+    "cat": "机位景别类"
+  },
+  "tilted frame": {
+    "cn": "倾斜构图",
+    "py": "Q",
+    "cat": "机位景别类"
+  },
+  "one-point perspective": {
+    "cn": "单点透视",
+    "py": "D",
+    "cat": "机位景别类"
+  },
+  "from head to mid-thigh": {
+    "cn": "头到大腿中段",
+    "py": "T",
+    "cat": "机位景别类"
+  },
+  "a soft-focus foreground element framing the shot": {
+    "cn": "前景虚化框景",
+    "py": "Q",
+    "cat": "机位景别类"
+  },
+  "both hands holding her hair": {
+    "cn": "双手拢发",
+    "py": "S",
+    "cat": "动作类"
+  },
+  "hand touching her own shoulder": {
+    "cn": "手触肩膀",
+    "py": "S",
+    "cat": "动作类"
+  },
+  "one hand gripping her own arm": {
+    "cn": "一手抓自己手臂",
+    "py": "Y",
+    "cat": "动作类"
+  },
+  "holding a folding fan": {
+    "cn": "手持折扇",
+    "py": "S",
+    "cat": "道具手持类"
+  },
+  "holding a katana": {
+    "cn": "手持武士刀",
+    "py": "S",
+    "cat": "道具手持类"
+  },
+  "holding a paper umbrella": {
+    "cn": "手持纸伞",
+    "py": "S",
+    "cat": "道具手持类"
+  },
+  "holding a wooden staff": {
+    "cn": "手持木杖",
+    "py": "S",
+    "cat": "道具手持类"
+  },
+  "holding a plush toy": {
+    "cn": "手持毛绒玩具",
+    "py": "S",
+    "cat": "道具手持类"
+  },
+  "silk blouse with a neck bow": {
+    "cn": "真丝领结衬衫",
+    "py": "Z",
+    "cat": "服饰类"
+  },
+  "car": {
+    "cn": "车内",
+    "py": "C",
+    "cat": "场景类"
+  },
+  "train": {
+    "cn": "车厢",
+    "py": "C",
+    "cat": "场景类"
+  },
+  "school": {
+    "cn": "校园",
+    "py": "X",
+    "cat": "场景类"
+  },
+  "cinema": {
+    "cn": "电影院",
+    "py": "D",
+    "cat": "场景类"
+  },
+  "hotel_room": {
+    "cn": "酒店房间",
+    "py": "J",
+    "cat": "场景类"
+  },
+  "living_room": {
+    "cn": "客厅",
+    "py": "K",
+    "cat": "场景类"
+  },
+  "forest_park": {
+    "cn": "林间",
+    "py": "L",
+    "cat": "场景类"
+  },
+  "photo_booth": {
+    "cn": "拍立得小间",
+    "py": "P",
+    "cat": "场景类"
+  },
+  "photobooth": {
+    "cn": "街拍",
+    "py": "J",
+    "cat": "场景类"
+  },
+  "city_day": {
+    "cn": "城市白天",
+    "py": "C",
+    "cat": "场景类"
+  },
+  "drive": {
+    "cn": "兜风",
+    "py": "D",
+    "cat": "场景类"
+  },
+  "rainy_home": {
+    "cn": "雨天在家",
+    "py": "Y",
+    "cat": "场景类"
+  },
+  "onsen_trip": {
+    "cn": "温泉旅行",
+    "py": "W",
+    "cat": "场景类"
+  },
+  "wet": {
+    "cn": "湿润",
+    "py": "S",
+    "cat": "状态类"
+  }
+}
